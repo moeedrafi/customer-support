@@ -13,12 +13,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FormEvent } from "react";
+
+type ChatRequestOptions = {
+  data: { prompt: string };
+};
+
+interface ChatFormProps {
+  input: string;
+  isLoading: boolean;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (
+    e?: React.FormEvent,
+    chatRequestOptions?: ChatRequestOptions
+  ) => void;
+}
 
 const formSchema = z.object({
   message: z.string().min(2, { message: "Enter a message" }),
 });
 
-export const ChatForm = () => {
+export const ChatForm = ({
+  handleInputChange,
+  handleSubmit,
+  input,
+  isLoading,
+}: ChatFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -26,15 +46,17 @@ export const ChatForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {};
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSubmit(e, {
+      data: { prompt: input },
+    });
+  };
 
   return (
     <div className="lg:px-40 p-5 border-t-2 flex items-center">
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full flex gap-2 items-center"
-        >
+        <form onSubmit={onSubmit} className="w-full flex gap-2 items-center">
           <FormField
             control={form.control}
             name="message"
@@ -43,7 +65,12 @@ export const ChatForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Enter a Message"
+                    value={input}
+                    disabled={isLoading}
+                    onChange={handleInputChange}
+                    placeholder={
+                      isLoading ? "Generating . . ." : "ask something . . . "
+                    }
                     className="rounded-xl py-6 bg-[#222141]"
                   />
                 </FormControl>

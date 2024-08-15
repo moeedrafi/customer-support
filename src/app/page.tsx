@@ -1,3 +1,3 @@
 export default function Home() {
-  return <div className="lg:px-60 h-full">Main Page</div>;
+  return <div className="lg:px-60 h-full">Main page</div>;
 }
